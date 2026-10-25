@@ -1,0 +1,266 @@
+package readline
+
+type commands map[string]func()
+
+func (rl *Shell) completionCommands() commands {
+	return map[string]func(){
+		"complete":               rl.completeWord,
+		"possible-completions":   rl.possibleCompletions,
+		"insert-completions":     rl.insertCompletions,
+		"menu-complete":          rl.menuComplete,
+		"menu-complete-backward": rl.menuCompleteBackward,
+		"delete-char-or-list":    rl.deleteCharOrList,
+
+		"menu-complete-next-tag":   rl.menuCompleteNextTag,
+		"menu-complete-prev-tag":   rl.menuCompletePrevTag,
+		"accept-and-menu-complete": rl.acceptAndMenuComplete,
+		"vi-registers-complete":    rl.viRegistersComplete,
+		"menu-incremental-search":  rl.menuIncrementalSearch,
+	}
+}
+
+func (rl *Shell) historyCommands() commands {
+	widgets := map[string]func(){
+		"accept-line":                            rl.acceptLine,
+		"next-history":                           rl.downHistory,
+		"previous-history":                       rl.upHistory,
+		"beginning-of-history":                   rl.beginningOfHistory,
+		"end-of-history":                         rl.endOfHistory,
+		"operate-and-get-next":                   rl.acceptLineAndDownHistory,
+		"fetch-history":                          rl.fetchHistory,
+		"forward-search-history":                 rl.forwardSearchHistory,
+		"reverse-search-history":                 rl.reverseSearchHistory,
+		"non-incremental-forward-search-history": rl.nonIncrementalForwardSearchHistory,
+		"non-incremental-reverse-search-history": rl.nonIncrementalReverseSearchHistory,
+		"history-search-forward":                 rl.historySearchForward,
+		"history-search-backward":                rl.historySearchBackward,
+		"history-substring-search-forward":       rl.historySubstringSearchForward,
+		"history-substring-search-backward":      rl.historySubstringSearchBackward,
+		"yank-last-arg":                          rl.yankLastArg,
+		"insert-last-argument":                   rl.yankLastArg,
+		"yank-nth-arg":                           rl.yankNthArg,
+		"magic-space":                            rl.magicSpace,
+
+		"accept-and-hold":                    rl.acceptAndHold,
+		"accept-and-infer-next-history":      rl.acceptAndInferNextHistory,
+		"down-line-or-history":               rl.downLineOrHistory,
+		"vi-down-line-or-history":            rl.viDownLineOrHistory,
+		"up-line-or-history":                 rl.upLineOrHistory,
+		"up-line-or-search":                  rl.upLineOrSearch,
+		"down-line-or-search":                rl.downLineOrSearch,
+		"down-line-or-select":                rl.downLineOrSelect,
+		"infer-next-history":                 rl.inferNextHistory,
+		"beginning-of-buffer-or-history":     rl.beginningOfBufferOrHistory,
+		"end-of-buffer-or-history":           rl.endOfBufferOrHistory,
+		"beginning-of-line-hist":             rl.beginningOfLineHist,
+		"end-of-line-hist":                   rl.endOfLineHist,
+		"incremental-forward-search-history": rl.incrementalForwardSearchHistory,
+		"incremental-reverse-search-history": rl.incrementalReverseSearchHistory,
+		"save-line":                          rl.saveLine,
+		"history-source-next":                rl.historySourceNext,
+		"history-source-prev":                rl.historySourcePrev,
+		"autosuggest-accept":                 rl.autosuggestAccept,
+		"autosuggest-execute":                rl.autosuggestExecute,
+		"autosuggest-enable":                 rl.autosuggestEnable,
+		"autosuggest-disable":                rl.autosuggestDisable,
+		"autosuggest-toggle":                 rl.autosuggestToggle,
+
+		"inline-suggest-accept":      rl.inlineSuggestAccept,
+		"inline-suggest-accept-word": rl.inlineSuggestAcceptWord,
+	}
+
+	return widgets
+}
+
+func (rl *Shell) standardCommands() commands {
+	widgets := map[string]func(){
+
+		"emacs-editing-mode": rl.emacsEditingMode,
+
+		"forward-char":         rl.forwardChar,
+		"backward-char":        rl.backwardChar,
+		"forward-word":         rl.forwardWord,
+		"backward-word":        rl.backwardWord,
+		"shell-forward-word":   rl.forwardShellWord,
+		"shell-backward-word":  rl.backwardShellWord,
+		"beginning-of-line":    rl.beginningOfLine,
+		"end-of-line":          rl.endOfLine,
+		"previous-screen-line": rl.upLine,
+		"next-screen-line":     rl.downLine,
+		"clear-screen":         rl.clearScreen,
+		"clear-display":        rl.clearDisplay,
+		"redraw-current-line":  rl.Display.Refresh,
+
+		"end-of-file":                  rl.endOfFile,
+		"delete-char":                  rl.deleteChar,
+		"backward-delete-char":         rl.backwardDeleteChar,
+		"forward-backward-delete-char": rl.forwardBackwardDeleteChar,
+		"quoted-insert":                rl.quotedInsert,
+		"tab-insert":                   rl.tabInsert,
+		"self-insert":                  rl.selfInsert,
+		"bracketed-paste-begin":        rl.bracketedPasteBegin,
+		"skip-csi-sequence":            rl.skipCsiSequence,
+		"transpose-chars":              rl.transposeChars,
+		"transpose-words":              rl.transposeWords,
+		"shell-transpose-words":        rl.shellTransposeWords,
+		"down-case-word":               rl.downCaseWord,
+		"up-case-word":                 rl.upCaseWord,
+		"capitalize-word":              rl.capitalizeWord,
+		"overwrite-mode":               rl.overwriteMode,
+		"delete-horizontal-whitespace": rl.deleteHorizontalWhitespace,
+
+		"delete-word":      rl.deleteWord,
+		"quote-region":     rl.quoteRegion,
+		"quote-line":       rl.quoteLine,
+		"keyword-increase": rl.keywordIncrease,
+		"keyword-decrease": rl.keywordDecrease,
+
+		"kill-line":           rl.killLine,
+		"backward-kill-line":  rl.backwardKillLine,
+		"unix-line-discard":   rl.backwardKillLine,
+		"kill-whole-line":     rl.killWholeLine,
+		"kill-word":           rl.killWord,
+		"backward-kill-word":  rl.backwardKillWord,
+		"unix-word-rubout":    rl.backwardKillWord,
+		"kill-region":         rl.killRegion,
+		"copy-region-as-kill": rl.copyRegionAsKill,
+		"copy-backward-word":  rl.copyBackwardWord,
+		"copy-forward-word":   rl.copyForwardWord,
+		"yank":                rl.yank,
+		"yank-pop":            rl.yankPop,
+
+		"kill-buffer":              rl.killBuffer,
+		"shell-kill-word":          rl.shellKillWord,
+		"shell-backward-kill-word": rl.shellBackwardKillWord,
+		"copy-prev-shell-word":     rl.copyPrevShellWord,
+
+		"digit-argument": rl.digitArgument,
+
+		"start-kbd-macro":      rl.startKeyboardMacro,
+		"end-kbd-macro":        rl.endKeyboardMacro,
+		"call-last-kbd-macro":  rl.callLastKeyboardMacro,
+		"print-last-kbd-macro": rl.printLastKeyboardMacro,
+
+		"macro-toggle-record": rl.macroToggleRecord,
+		"macro-run":           rl.macroRun,
+
+		"re-read-init-file":         rl.reReadInitFile,
+		"abort":                     rl.abort,
+		"do-lowercase-version":      rl.doLowercaseVersion,
+		"prefix-meta":               rl.prefixMeta,
+		"undo":                      rl.undoLast,
+		"revert-line":               rl.revertLine,
+		"set-mark":                  rl.setMark,
+		"exchange-point-and-mark":   rl.exchangePointAndMark,
+		"character-search":          rl.characterSearch,
+		"character-search-backward": rl.characterSearchBackward,
+		"insert-comment":            rl.insertComment,
+		"dump-functions":            rl.dumpFunctions,
+		"dump-variables":            rl.dumpVariables,
+		"dump-macros":               rl.dumpMacros,
+		"magic-space":               rl.magicSpace,
+		"edit-and-execute-command":  rl.editAndExecuteCommand,
+		"edit-command-line":         rl.editCommandLine,
+
+		"redo":                rl.redo,
+		"select-keyword-next": rl.selectKeywordNext,
+		"select-keyword-prev": rl.selectKeywordPrev,
+	}
+
+	return widgets
+}
+
+func (rl *Shell) viCommands() commands {
+	return map[string]func(){
+
+		"vi-append-mode":    rl.viAddNext,
+		"vi-append-eol":     rl.viAddEol,
+		"vi-insertion-mode": rl.viInsertMode,
+		"vi-insert-beg":     rl.viInsertBol,
+		"vi-movement-mode":  rl.viCommandMode,
+		"vi-visual-mode":    rl.viVisualMode,
+		"vi-editing-mode":   rl.viInsertMode,
+
+		"vi-visual-line-mode": rl.viVisualLineMode,
+
+		"vi-backward-char":    rl.viBackwardChar,
+		"vi-forward-char":     rl.viForwardChar,
+		"vi-prev-word":        rl.viBackwardWord,
+		"vi-next-word":        rl.viForwardWord,
+		"vi-backward-word":    rl.viBackwardWord,
+		"vi-forward-word":     rl.viForwardWord,
+		"vi-backward-bigword": rl.viBackwardBlankWord,
+		"vi-forward-bigword":  rl.viForwardBlankWord,
+		"vi-end-word":         rl.viForwardWordEnd,
+		"vi-end-bigword":      rl.viForwardBlankWordEnd,
+		"vi-match":            rl.viMatchBracket,
+		"vi-column":           rl.viGotoColumn,
+		"vi-end-of-line":      rl.viEndOfLine,
+		"vi-back-to-indent":   rl.viBackToIndent,
+		"vi-first-print":      rl.viFirstPrint,
+		"vi-goto-mark":        rl.viGotoMark,
+
+		"vi-backward-end-word":    rl.viBackwardWordEnd,
+		"vi-backward-end-bigword": rl.viBackwardBlankWordEnd,
+
+		"vi-change-to":            rl.viChangeTo,
+		"vi-delete-to":            rl.viDeleteTo,
+		"vi-delete":               rl.viDeleteChar,
+		"vi-change-char":          rl.viChangeChar,
+		"vi-backward-delete-char": rl.viBackwardDeleteChar,
+		"vi-replace":              rl.viReplace,
+		"vi-overstrike":           rl.viReplace,
+		"vi-change-case":          rl.viChangeCase,
+		"vi-subst":                rl.viSubstitute,
+
+		"vi-change-eol":      rl.viChangeEol,
+		"vi-add-surround":    rl.viAddSurround,
+		"vi-open-line-above": rl.viOpenLineAbove,
+		"vi-open-line-below": rl.viOpenLineBelow,
+		"vi-down-case":       rl.viDownCase,
+		"vi-up-case":         rl.viUpCase,
+
+		"vi-kill-eol":         rl.viKillEol,
+		"vi-unix-word-rubout": rl.backwardKillWord,
+		"vi-rubout":           rl.viRubout,
+		"vi-yank-to":          rl.viYankTo,
+		"vi-yank-pop":         rl.yankPop,
+		"vi-yank-arg":         rl.yankLastArg,
+
+		"vi-kill-line":       rl.viKillLine,
+		"vi-put":             rl.viPut,
+		"vi-put-after":       rl.viPutAfter,
+		"vi-put-before":      rl.viPutBefore,
+		"vi-set-buffer":      rl.viSetBuffer,
+		"vi-yank-whole-line": rl.viYankWholeLine,
+
+		"select-a-blank-word":  rl.viSelectABlankWord,
+		"select-a-shell-word":  rl.viSelectAShellWord,
+		"select-a-word":        rl.viSelectAWord,
+		"select-in-blank-word": rl.viSelectInBlankWord,
+		"select-in-shell-word": rl.viSelectInShellWord,
+		"select-in-word":       rl.viSelectInWord,
+		"vi-select-inside":     rl.viSelectInside,
+		"vi-select-surround":   rl.viSelectSurround,
+
+		"vi-eof-maybe":                rl.viEOFMaybe,
+		"vi-search":                   rl.viSearch,
+		"vi-search-again":             rl.viSearchAgain,
+		"vi-arg-digit":                rl.viArgDigit,
+		"vi-char-search":              rl.viCharSearch,
+		"vi-set-mark":                 rl.viSetMark,
+		"vi-edit-and-execute-command": rl.viEditAndExecuteCommand,
+		"vi-undo":                     rl.undoLast,
+		"vi-redo":                     rl.viRedo,
+
+		"vi-edit-command-line":     rl.viEditCommandLine,
+		"vi-find-next-char":        rl.viFindNextChar,
+		"vi-find-next-char-skip":   rl.viFindNextCharSkip,
+		"vi-find-prev-char":        rl.viFindPrevChar,
+		"vi-find-prev-char-skip":   rl.viFindPrevCharSkip,
+		"vi-search-forward":        rl.viSearchForward,
+		"vi-search-backward":       rl.viSearchBackward,
+		"vi-search-again-forward":  rl.viSearchAgainForward,
+		"vi-search-again-backward": rl.viSearchAgainBackward,
+	}
+}
