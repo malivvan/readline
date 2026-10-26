@@ -5,7 +5,7 @@ package core
 import (
 	"testing"
 
-	"github.com/creack/pty"
+	"github.com/malivvan/pty"
 
 	"github.com/malivvan/readline/term"
 )

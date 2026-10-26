@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/creack/pty"
+	"github.com/malivvan/pty"
 )
 
 // TestReadlineReturnsWhenOutputIsNotTerminal reproduces a hang: the

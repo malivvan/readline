@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/creack/pty"
 	"github.com/hinshun/vt10x"
+	"github.com/malivvan/pty"
 
 	"github.com/malivvan/readline"
 )
